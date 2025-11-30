@@ -2,527 +2,415 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetrologyPro AI - Smart History System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MetrologyPro AI - Enterprise System</title>
     
-    <!-- Libraries -->
+    <!-- 1. STYLE & FONTS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+    <!-- 2. CORE LIBRARIES -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <!-- 3. FIREBASE LIBRARIES (Versi Kompatibel Global) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
-        :root {
-            --bg-dark: #09090b;
-            --bg-sidebar: #050505;
-            --accent: #3b82f6;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #e4e4e7; overflow: hidden; }
-        
-        .scroller::-webkit-scrollbar { width: 5px; }
+        :root { --bg-dark: #09090b; --bg-sidebar: #0f0f11; --accent: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #e4e4e7; overflow: hidden; height: 100dvh; width: 100vw; }
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .scroller::-webkit-scrollbar { width: 4px; }
         .scroller::-webkit-scrollbar-track { background: transparent; }
         .scroller::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
-        
-        .glass { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
-        .glass-popover { background: rgba(30, 30, 35, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        .glass { background: rgba(24, 24, 27, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .glass-popover { background: rgba(30, 30, 35, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-enter { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+        .typing-dot { animation: pulse-dot 1.2s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; } .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-slide-up { animation: slideUp 0.2s ease-out forwards; }
-        
-        .typing-dot { animation: pulse 1s infinite; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        .prose p { margin-bottom: 0.5em; line-height: 1.6; }
-        .prose strong { color: #fff; }
-        .prose a { color: #60a5fa; }
-        .prose ul { list-style: disc; padding-left: 1.5em; }
+        .prose { font-size: 0.935rem; max-width: none; }
+        .prose p { margin-bottom: 1.25em; line-height: 1.75; color: #d4d4d8; letter-spacing: 0.01em; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose h1, .prose h2, .prose h3 { color: #f4f4f5; font-weight: 700; margin-top: 1.75em; margin-bottom: 0.75em; line-height: 1.3; }
+        .prose strong { color: #fff; font-weight: 600; }
+        .prose a { color: #60a5fa; text-decoration: underline; text-underline-offset: 2px; }
+        .prose ul { list-style: disc; padding-left: 1.4em; color: #d4d4d8; margin-bottom: 1.25em; }
+        .prose ol { list-style: decimal; padding-left: 1.4em; color: #d4d4d8; margin-bottom: 1.25em; }
+        .prose blockquote { border-left: 4px solid #3b82f6; padding: 0.75rem 1rem; margin: 1.5rem 0; background: rgba(59, 130, 246, 0.05); border-radius: 0 0.5rem 0.5rem 0; color: #a1a1aa; font-style: italic; }
+        .user-content .prose p { color: #fff; margin-bottom: 0.5em; }
     </style>
+    
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root" class="h-full w-full"></div>
 
+    <!-- 4. FIREBASE INIT (GLOBAL SCOPE - PASTI JALAN) -->
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCRSxm9fVf0rjOCdVfzGyPoYjK9_wtUr8I",
+          authDomain: "metrologi-ai.firebaseapp.com",
+          projectId: "metrologi-ai",
+          storageBucket: "metrologi-ai.firebasestorage.app",
+          messagingSenderId: "410304688412",
+          appId: "1:410304688412:web:308e7238e0ac27ddff4ad9",
+          measurementId: "G-51DBTK798E"
+        };
+
+        // Initialize Firebase Global
+        try {
+            firebase.initializeApp(firebaseConfig);
+            window.auth = firebase.auth();
+            window.db = firebase.firestore();
+            console.log("Firebase Global Init Success");
+        } catch (error) {
+            console.error("Firebase Init Error:", error);
+            alert("Gagal memuat Firebase. Cek koneksi internet.");
+        }
+
+        // Global Service Wrapper
+        window.appService = {
+            loginGoogle: async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    const result = await window.auth.signInWithPopup(provider);
+                    return result.user;
+                } catch (error) {
+                    console.error(error);
+                    if (error.code === 'auth/operation-not-allowed') {
+                        alert("Error: Login Google belum diaktifkan di Firebase Console.");
+                    } else if (error.code === 'auth/popup-closed-by-user') {
+                        // User menutup popup, abaikan
+                    } else {
+                        alert(`Login Gagal: ${error.message}`);
+                    }
+                    throw error;
+                }
+            },
+            logout: async () => {
+                await window.auth.signOut();
+            },
+            saveSession: async (session, userId) => {
+                if (!userId) return;
+                // Bersihkan data sebelum kirim (hapus objek file)
+                const cleanMessages = session.messages.map(m => ({
+                    ...m,
+                    attachments: m.attachments ? m.attachments.map(a => ({ name: a.name, type: a.type })) : []
+                }));
+                
+                await window.db.collection("sessions").doc(session.id).set({
+                    ...session,
+                    userId: userId,
+                    messages: cleanMessages,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            }
+        };
+    </script>
+
+    <!-- 5. REACT APP -->
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-
         const API_KEY = "AIzaSyCHQbkmex1buEVSLGJHMFeSDuH6BQTCE8w"; 
         const MODEL = "gemini-2.5-flash-preview-09-2025";
         
-        // --- HELPER FUNCTIONS ---
         const generateId = () => Math.random().toString(36).substr(2, 9);
-        const getCurrentTime = () => new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+        const getTime = () => new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
-        // --- COMPONENTS ---
+        const extractTextFromPDF = async (file) => {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                let fullText = "";
+                const maxPages = Math.min(pdf.numPages, 10);
+                for (let i = 1; i <= maxPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(" ");
+                    fullText += `[Halaman ${i}]: ${pageText}\n`;
+                }
+                return fullText;
+            } catch (error) { console.error("PDF Error:", error); return "Gagal membaca teks PDF."; }
+        };
 
-        // 1. Sidebar Item
-        const HistoryItem = ({ session, isActive, onClick, onDelete }) => (
-            <div className={`group flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer transition-all border ${isActive ? 'bg-[#1e1e22] border-white/10 text-white' : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'}`} onClick={onClick}>
-                <i className={`fa-regular fa-message text-xs ${isActive ? 'text-blue-400' : 'opacity-70'}`}></i>
+        const fileToBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+        });
+
+        const SidebarItem = ({ session, active, onClick, onDelete }) => (
+            <div onClick={onClick} className={`group flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-all border ${active ? 'bg-white/10 border-white/10 text-white' : 'border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'}`}>
+                <i className={`fa-regular fa-message text-xs ${active ? 'text-blue-400' : 'opacity-50'}`}></i>
                 <div className="flex-1 overflow-hidden">
                     <p className="text-sm font-medium truncate">{session.title}</p>
-                    <p className="text-[10px] opacity-60 truncate">{session.timestamp.toLocaleDateString()}</p>
+                    <p className="text-[10px] opacity-50 truncate">{session.timestamp.toLocaleDateString()}</p>
                 </div>
-                {/* Delete button (hidden by default, shown on hover) */}
-                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-opacity">
-                    <i className="fa-solid fa-xmark text-xs"></i>
-                </button>
+                <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="w-6 h-6 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all"><i className="fa-solid fa-xmark text-xs"></i></button>
             </div>
         );
 
-        // 2. Drive Modal
-        const DrivePickerModal = ({ isOpen, onClose, onSelect }) => {
-            if (!isOpen) return null;
-            const [loading, setLoading] = useState(true);
-            
-            useEffect(() => {
-                if (isOpen) {
-                    setLoading(true);
-                    setTimeout(() => setLoading(false), 1200); 
-                }
-            }, [isOpen]);
-
-            const files = [
-                { name: "Laporan_Tera_Tahunan_2024.pdf", type: "pdf", size: "2.5 MB" },
-                { name: "Foto_Alat_Ukur_Pasar.jpg", type: "image", size: "1.2 MB" },
-                { name: "SOP_Pengawasan_UTTP.docx", type: "doc", size: "800 KB" }
-            ];
-
-            return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="glass-popover w-full max-w-md rounded-xl overflow-hidden animate-slide-up">
-                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-[#18181b]">
-                            <h3 className="font-semibold text-white flex items-center gap-2"><i className="fa-brands fa-google-drive text-green-500"></i> Google Drive</h3>
-                            <button onClick={onClose}><i className="fa-solid fa-xmark text-gray-400"></i></button>
-                        </div>
-                        <div className="p-4 min-h-[200px]">
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center h-48 gap-3 text-gray-400">
-                                    <i className="fa-solid fa-circle-notch fa-spin text-2xl text-blue-500"></i>
-                                    <span className="text-xs">Menghubungkan ke Drive...</span>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {files.map((f, i) => (
-                                        <button key={i} onClick={() => onSelect(f)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 text-left group border border-transparent hover:border-white/5">
-                                            <div className={`w-8 h-8 rounded flex items-center justify-center ${f.type === 'pdf' ? 'bg-red-500/20 text-red-400' : f.type === 'image' ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-600/20 text-blue-300'}`}>
-                                                <i className={`fa-solid ${f.type === 'pdf' ? 'fa-file-pdf' : f.type === 'image' ? 'fa-image' : 'fa-file'}`}></i>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-200 group-hover:text-blue-400">{f.name}</p>
-                                                <p className="text-[10px] text-gray-500">{f.size}</p>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- MAIN APP ---
         const App = () => {
-            // -- STATE --
             const [user, setUser] = useState(null);
-            
-            // HISTORY STATE: Array of session objects
-            const [sessions, setSessions] = useState([
-                {
-                    id: 'init',
-                    title: 'Chat Baru',
-                    timestamp: new Date(),
-                    messages: [
-                        { id: 'welcome', role: 'ai', text: "Halo. Saya **MetrologyPro AI**.\n\nSilakan ajukan pertanyaan atau unggah dokumen untuk memulai.", timestamp: getCurrentTime() }
-                    ]
-                }
-            ]);
-            const [activeSessionId, setActiveSessionId] = useState('init');
-            
+            const [authLoading, setAuthLoading] = useState(true);
+            const [sessions, setSessions] = useState([{ id: 'init', title: 'Chat Baru', timestamp: new Date(), messages: [{ id: 'w1', role: 'ai', text: "Halo. Saya **MetrologyPro AI**.\n\nSaya siap membantu analisis teknis dan regulasi.", timestamp: getTime() }] }]);
+            const [activeId, setActiveId] = useState('init');
             const [input, setInput] = useState("");
             const [isLoading, setIsLoading] = useState(false);
-            const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [menuOpen, setMenuOpen] = useState(false);
             const [attachments, setAttachments] = useState([]);
-            const [showDrive, setShowDrive] = useState(false);
 
-            // Refs
-            const messagesEndRef = useRef(null);
-            const fileInputRef = useRef(null);
-            const pdfInputRef = useRef(null);
-            const menuRef = useRef(null);
+            const bottomRef = useRef(null);
+            const fileRef = useRef(null);
+            const pdfRef = useRef(null);
 
-            // Derived State
-            const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
-            const currentMessages = activeSession.messages;
+            const activeSession = sessions.find(s => s.id === activeId) || sessions[0];
+            const messages = activeSession.messages;
 
-            // Effects
-            useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [currentMessages, isLoading]);
-            
-            // Click outside menu
             useEffect(() => {
-                const handleClickOutside = (event) => { if (menuRef.current && !menuRef.current.contains(event.target)) setIsMenuOpen(false); };
-                document.addEventListener("mousedown", handleClickOutside);
-                return () => document.removeEventListener("mousedown", handleClickOutside);
-            }, []);
-
-            // -- HANDLERS --
-
-            const createNewSession = () => {
-                const newId = generateId();
-                const newSession = {
-                    id: newId,
-                    title: 'Chat Baru', // Default title before first query
-                    timestamp: new Date(),
-                    messages: [
-                        { id: generateId(), role: 'ai', text: "Sesi baru dimulai. Ada yang bisa saya bantu?", timestamp: getCurrentTime() }
-                    ]
-                };
-                setSessions(prev => [newSession, ...prev]); // Add to top
-                setActiveSessionId(newId);
-                if(window.innerWidth < 768) setIsSidebarOpen(false);
-            };
-
-            const deleteSession = (idToDelete) => {
-                const filtered = sessions.filter(s => s.id !== idToDelete);
-                if (filtered.length === 0) {
-                    // If all deleted, create new default
-                    setSessions([{ id: 'new', title: 'Chat Baru', timestamp: new Date(), messages: [{ id: 'w', role: 'ai', text: "Siap membantu.", timestamp: getCurrentTime() }] }]);
-                    setActiveSessionId('new');
-                } else {
-                    setSessions(filtered);
-                    if (activeSessionId === idToDelete) setActiveSessionId(filtered[0].id);
-                }
-            };
-
-            const handleLogin = () => {
-                setUser({
-                    name: "Andi Saputra",
-                    email: "andi.upt@metrologi.go.id",
-                    avatar: "https://ui-avatars.com/api/?name=Andi+Saputra&background=3b82f6&color=fff"
+                // AUTH LISTENER
+                const unsubscribe = window.auth.onAuthStateChanged((u) => {
+                    setUser(u);
+                    setAuthLoading(false);
+                    
+                    if (u) {
+                        // Load history from Cloud
+                        window.db.collection("sessions")
+                            .where("userId", "==", u.uid)
+                            .orderBy("updatedAt", "desc")
+                            .onSnapshot((snapshot) => {
+                                const cloudSessions = snapshot.docs.map(doc => ({
+                                    id: doc.id,
+                                    ...doc.data(),
+                                    timestamp: doc.data().updatedAt?.toDate() || new Date()
+                                }));
+                                
+                                if (cloudSessions.length > 0) {
+                                    setSessions(cloudSessions);
+                                    // If active ID is not in cloud list, select first
+                                    const currentExists = cloudSessions.find(s => s.id === activeId);
+                                    if (!currentExists && activeId === 'init') {
+                                        setActiveId(cloudSessions[0].id);
+                                    }
+                                }
+                            }, (error) => {
+                                console.error("Firestore Error:", error);
+                                if (error.code === 'failed-precondition') {
+                                    console.log("Firestore index missing. This is normal for new queries. Please check console link.");
+                                }
+                            });
+                    } else {
+                        // Reset to local default
+                        setSessions([{ id: 'init', title: 'Chat Baru', timestamp: new Date(), messages: [{ id: 'w1', role: 'ai', text: "Halo. Saya **MetrologyPro AI**.\n\nSilakan login untuk menyimpan riwayat.", timestamp: getTime() }] }]);
+                        setActiveId('init');
+                    }
                 });
+                return () => unsubscribe();
+            }, [activeId]);
+
+            useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, isLoading]);
+
+            const handleLogin = async () => {
+                try { await window.appService.loginGoogle(); } catch (e) { /* Error handled in service */ }
+            };
+            const handleLogout = async () => { await window.appService.logout(); };
+
+            const createSession = () => {
+                const newId = generateId();
+                const newSession = { id: newId, title: 'Chat Baru', timestamp: new Date(), messages: [] };
+                setSessions([newSession, ...sessions]);
+                setActiveId(newId);
+                setSidebarOpen(false);
             };
 
-            const handleFileSelect = (e, type) => {
-                if (e.target.files[0]) {
-                    const file = e.target.files[0];
+            const deleteSession = (id) => {
+                // Local delete visual
+                const remain = sessions.filter(s => s.id !== id);
+                if(remain.length === 0) { setSessions([{ id: 'init', title: 'Chat Baru', timestamp: new Date(), messages: []}]); setActiveId('init'); } 
+                else { setSessions(remain); if(activeId === id) setActiveId(remain[0].id); }
+                // TODO: Add cloud delete if needed
+            };
+
+            const handleFile = (e, type) => {
+                const f = e.target.files[0];
+                if(f) {
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        setAttachments(prev => [...prev, { name: file.name, type, preview: type === 'image' ? ev.target.result : null, file }]);
-                        setIsMenuOpen(false);
+                        setAttachments([...attachments, { name: f.name, type, preview: type === 'image' ? ev.target.result : null, file: f }]);
+                        setMenuOpen(false);
                     };
-                    reader.readAsDataURL(file);
+                    reader.readAsDataURL(f);
                 }
                 e.target.value = null;
-            };
-
-            const handleDriveSelect = (file) => {
-                setAttachments(prev => [...prev, { name: file.name, type: file.type, fromDrive: true }]);
-                setShowDrive(false);
-                setIsMenuOpen(false);
             };
 
             const handleSend = async (e) => {
                 e.preventDefault();
                 if ((!input.trim() && attachments.length === 0) || isLoading) return;
 
-                const userMsgId = generateId();
-                const userText = input;
-                const userAtts = [...attachments];
+                const txt = input;
+                const atts = [...attachments]; 
                 
-                // 1. Update UI with User Message immediately
-                setSessions(prev => prev.map(session => {
-                    if (session.id === activeSessionId) {
-                        // LOGIC UPDATE JUDUL: Jika ini pesan user pertama (setelah greeting AI), update judul
-                        // Pesan ke-0 biasanya AI greeting. Pesan ke-1 adalah User.
-                        const isFirstUserMsg = session.messages.length === 1 && session.messages[0].role === 'ai';
-                        let newTitle = session.title;
+                let updatedSession = null;
+                setSessions(prev => prev.map(s => {
+                    if (s.id === activeId) {
+                        let newTitle = s.title;
+                        const userMsgCount = s.messages.filter(m => m.role === 'user').length;
+                        if (userMsgCount === 0) newTitle = txt ? (txt.slice(0, 25) + (txt.length>25?'...':'')) : (atts.length > 0 ? `File: ${atts[0].name}` : 'Chat Baru');
                         
-                        if (isFirstUserMsg) {
-                            // Ambil 4-5 kata pertama atau potong string
-                            newTitle = userText.split(' ').slice(0, 5).join(' ');
-                            if(userText.length > newTitle.length) newTitle += "...";
-                            if(userAtts.length > 0 && !userText) newTitle = `Analisis ${userAtts[0].name}`;
-                        }
-
-                        return {
-                            ...session,
-                            title: newTitle,
-                            messages: [...session.messages, {
-                                id: userMsgId,
-                                role: 'user',
-                                text: userText,
-                                attachments: userAtts,
-                                timestamp: getCurrentTime()
-                            }]
-                        };
+                        updatedSession = { ...s, title: newTitle, messages: [...s.messages, { id: generateId(), role: 'user', text: txt, attachments: atts, timestamp: getTime() }] };
+                        return updatedSession;
                     }
-                    return session;
+                    return s;
                 }));
 
-                setInput("");
-                setAttachments([]);
-                setIsLoading(true);
+                setInput(""); setAttachments([]); setIsLoading(true);
 
-                // 2. Prepare Context for API
-                // We construct a history prompt from current messages
-                const historyContext = currentMessages.map(m => ({
-                    role: m.role === 'ai' ? 'model' : 'user',
-                    parts: [{ text: m.text }]
-                }));
-                
-                let promptText = userText;
-                if(userAtts.length > 0) promptText += `\n[System: User uploaded ${userAtts.length} files: ${userAtts.map(a => a.name).join(', ')}]`;
+                // Save User Msg
+                if (user && updatedSession) window.appService.saveSession(updatedSession, user.uid);
+
+                let apiParts = [];
+                let contextText = txt;
+                const historyParts = messages.slice(-5).map(m => ({ role: m.role==='ai'?'model':'user', parts: [{ text: m.text }] }));
 
                 try {
+                    if (atts.length > 0) {
+                        contextText += `\n\n[Daftar Lampiran User:]\n`;
+                        for (const att of atts) {
+                            if (att.type === 'image') {
+                                const base64Data = await fileToBase64(att.file);
+                                apiParts.push({ inlineData: { mimeType: att.file.type, data: base64Data } });
+                                contextText += `- Gambar: ${att.name} (Data visual dikirim)\n`;
+                            } else if (att.type === 'pdf') {
+                                const pdfText = await extractTextFromPDF(att.file);
+                                contextText += `- Dokumen PDF (${att.name}) ISI TEKS:\n${pdfText}\n---\n`;
+                            }
+                        }
+                    }
+                    apiParts.push({ text: contextText });
+
+                    const systemInstruction = {
+                        parts: [{ text: "Anda adalah MetrologyPro AI, asisten virtual Direktorat Metrologi. Tugas Anda adalah menjawab pertanyaan seputar Metrologi Legal, regulasi (UU, Permendag), standar teknis alat ukur, dan prosedur tera. Jawablah dengan profesional, akurat, dan gunakan Bahasa Indonesia yang baku. Jika ada data yang tidak diketahui, carilah menggunakan Google Search. Jangan membuat kode program." }]
+                    };
+
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [...historyContext, { role: 'user', parts: [{ text: promptText }] }],
-                            tools: [{ google_search: {} }]
-                        })
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [...historyParts, { role: 'user', parts: apiParts }], systemInstruction: systemInstruction, tools: [{ google_search: {} }] })
                     });
-                    
+
                     const data = await res.json();
-                    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, terjadi kesalahan koneksi.";
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, respon tidak tersedia.";
                     const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks?.filter(c => c.web?.uri).map(c => ({ title: c.web?.title, uri: c.web?.uri })) || [];
                     const uniqueSources = [...new Map(sources.map(item => [item['uri'], item])).values()];
 
-                    // 3. Update UI with AI Message
-                    setSessions(prev => prev.map(session => {
-                        if (session.id === activeSessionId) {
-                            return {
-                                ...session,
-                                messages: [...session.messages, {
-                                    id: generateId(),
-                                    role: 'ai',
-                                    text: aiResponse,
-                                    sources: uniqueSources,
-                                    timestamp: getCurrentTime()
-                                }]
-                            };
+                    let finalSession = null;
+                    setSessions(prev => prev.map(s => {
+                        if (s.id === activeId) {
+                            finalSession = { ...s, messages: [...s.messages, { id: generateId(), role: 'ai', text, sources: uniqueSources, timestamp: getTime() }] };
+                            return finalSession;
                         }
-                        return session;
+                        return s;
                     }));
 
-                } catch (error) {
-                    setSessions(prev => prev.map(s => s.id === activeSessionId ? {...s, messages: [...s.messages, {id: generateId(), role: 'ai', text: "Error: Gagal menghubungi server.", isError: true}]} : s));
-                } finally {
-                    setIsLoading(false);
-                }
+                    // Save AI Msg
+                    if (user && finalSession) window.appService.saveSession(finalSession, user.uid);
+
+                } catch (err) {
+                    setSessions(prev => prev.map(s => s.id === activeId ? {...s, messages: [...s.messages, { id: generateId(), role: 'ai', text: `Error: ${err.message}`, isError: true }]} : s));
+                } finally { setIsLoading(false); }
             };
 
-            const renderMarkdown = (text) => ({ __html: marked.parse(text) });
+            const renderMarkdown = (txt) => ({ __html: marked.parse(txt) });
 
             return (
-                <div className="flex h-screen w-full relative overflow-hidden">
-                    
-                    <DrivePickerModal isOpen={showDrive} onClose={() => setShowDrive(false)} onSelect={handleDriveSelect} />
-
-                    {/* --- SIDEBAR --- */}
-                    <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} absolute md:relative z-40 w-80 h-full bg-[var(--bg-sidebar)] border-r border-white/5 flex flex-col transition-transform duration-300 shadow-2xl md:shadow-none`}>
-                        
-                        {/* Header */}
-                        <div className="p-5 flex items-center gap-3 border-b border-white/5">
-                            <div className="w-8 h-8 rounded bg-gradient-to-tr from-blue-700 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <i className="fa-solid fa-cube text-white text-xs"></i>
+                <div className="flex h-full w-full relative">
+                    {/* SIDEBAR */}
+                    <div className={`fixed inset-y-0 left-0 z-[60] w-72 bg-[var(--bg-sidebar)] border-r border-white/5 flex flex-col transition-transform duration-300 transform md:relative md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="h-16 flex items-center px-5 border-b border-white/5 safe-top">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20"><i className="fa-solid fa-cube text-white text-xs"></i></div>
+                                <div><h1 className="font-bold text-sm text-white tracking-wide leading-none">MetrologyPro</h1><span className="text-[10px] text-gray-500 font-mono">Enterprise</span></div>
                             </div>
-                            <div>
-                                <h1 className="font-bold text-sm text-white tracking-wide">MetrologyPro</h1>
-                                <p className="text-[10px] text-gray-500">Workspace</p>
-                            </div>
-                            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden ml-auto text-gray-400"><i className="fa-solid fa-xmark"></i></button>
+                            <button onClick={() => setSidebarOpen(false)} className="md:hidden ml-auto text-gray-500 p-2"><i className="fa-solid fa-xmark"></i></button>
                         </div>
-
-                        {/* New Chat Button */}
-                        <div className="p-4">
-                            <button onClick={createNewSession} className="w-full flex items-center justify-center gap-2 bg-[#1e1e22] hover:bg-[#27272a] border border-white/10 text-white py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm">
-                                <i className="fa-solid fa-plus text-blue-500"></i>
-                                <span>Chat Baru</span>
-                            </button>
-                        </div>
-
-                        {/* History List */}
-                        <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1 scroller">
-                            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2 px-1">Riwayat</p>
-                            {sessions.map(session => (
-                                <HistoryItem 
-                                    key={session.id} 
-                                    session={session} 
-                                    isActive={activeSessionId === session.id} 
-                                    onClick={() => { setActiveSessionId(session.id); if(window.innerWidth < 768) setIsSidebarOpen(false); }}
-                                    onDelete={() => deleteSession(session.id)}
-                                />
-                            ))}
-                        </div>
-
-                        {/* User Profile Footer */}
-                        <div className="p-4 border-t border-white/5 bg-[#0a0a0c]">
-                            {!user ? (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 opacity-60">
-                                        <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center"><i className="fa-solid fa-user text-xs"></i></div>
-                                        <div className="text-xs">Guest Mode</div>
-                                    </div>
-                                    <button onClick={handleLogin} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-500">Login</button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <img src={user.avatar} className="w-8 h-8 rounded-full border border-blue-500/30" />
-                                        <div className="overflow-hidden">
-                                            <p className="text-xs font-bold text-white truncate w-24">{user.name}</p>
-                                            <p className="text-[10px] text-gray-500 truncate w-24">Google Account</p>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => setUser(null)} className="text-gray-500 hover:text-red-400"><i className="fa-solid fa-right-from-bracket"></i></button>
-                                </div>
-                            )}
+                        <div className="p-4"><button onClick={createSession} className="w-full flex items-center justify-center gap-2 bg-[#1c1c1f] hover:bg-[#27272a] border border-white/5 text-white py-2.5 rounded-xl text-sm font-medium transition-all"><i className="fa-solid fa-plus text-blue-500"></i><span>Chat Baru</span></button></div>
+                        <div className="flex-1 overflow-y-auto px-2 space-y-1 scroller py-2"><p className="px-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2">Riwayat</p>{sessions.map(s => <SidebarItem key={s.id} session={s} active={activeId === s.id} onClick={() => {setActiveId(s.id); setSidebarOpen(false);}} onDelete={() => deleteSession(s.id)} />)}</div>
+                        <div className="p-4 border-t border-white/5 bg-black/20 safe-bottom">
+                            {authLoading ? <div className="text-center text-xs text-gray-500"><i className="fa-solid fa-circle-notch fa-spin mr-2"></i>Loading Auth...</div> : user ? 
+                            <div className="flex items-center justify-between"><div className="flex items-center gap-3 overflow-hidden">{user.photoURL ? <img src={user.photoURL} className="w-9 h-9 rounded-full border border-white/10" /> : <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center">{user.displayName?.[0]}</div>}<div className="flex-1 min-w-0"><p className="text-xs font-bold text-white truncate">{user.displayName}</p><p className="text-[10px] text-gray-500 truncate">{user.email}</p></div></div><button onClick={handleLogout} className="text-gray-500 hover:text-red-400 p-2"><i className="fa-solid fa-right-from-bracket"></i></button></div> : 
+                            <button onClick={handleLogin} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-900/20"><i className="fa-brands fa-google"></i> Login Google</button>}
                         </div>
                     </div>
+                    {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden"></div>}
 
-                    {/* --- MAIN CHAT AREA --- */}
-                    <div className="flex-1 flex flex-col h-full bg-[#09090b] relative">
-                        
-                        {/* Mobile Header */}
-                        <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#09090b]/80 backdrop-blur z-20">
-                            <div className="font-bold text-white text-sm">MetrologyPro</div>
-                            <button onClick={() => setIsSidebarOpen(true)} className="text-gray-300"><i className="fa-solid fa-bars"></i></button>
+                    {/* MAIN CHAT */}
+                    <div className="flex-1 flex flex-col h-full bg-[#09090b] relative w-full">
+                        <div className="md:hidden flex items-center justify-between px-4 h-16 border-b border-white/5 bg-[#09090b]/90 backdrop-blur z-40 sticky top-0 safe-top">
+                            <div className="flex items-center gap-2"><i className="fa-solid fa-shield-halved text-blue-500"></i><span className="font-bold text-white text-sm">MetrologyPro</span></div>
+                            <button onClick={() => setSidebarOpen(true)} className="text-gray-300 p-2"><i className="fa-solid fa-bars text-lg"></i></button>
                         </div>
-
-                        {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroller">
-                            {currentMessages.map((msg) => (
-                                <div key={msg.id} className={`flex gap-4 max-w-4xl mx-auto ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                                    
-                                    {msg.role === 'ai' && (
-                                        <div className="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-1 border border-blue-500/20">
-                                            <i className="fa-solid fa-robot text-blue-400 text-xs"></i>
-                                        </div>
-                                    )}
-
-                                    <div className={`flex flex-col gap-1 max-w-[85%] md:max-w-[70%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                                        <div className="flex items-center gap-2 mb-1 px-1">
-                                            <span className="text-[10px] text-gray-500">{msg.role === 'user' ? 'Anda' : 'Metrology AI'} • {msg.timestamp}</span>
-                                        </div>
-
-                                        {/* Attachments Bubble */}
-                                        {msg.attachments && msg.attachments.length > 0 && (
-                                            <div className="flex gap-2 mb-2 flex-wrap justify-end">
-                                                {msg.attachments.map((att, idx) => (
-                                                    <div key={idx} className="bg-[#18181b] border border-white/10 rounded p-1.5 flex items-center gap-2 pr-3">
-                                                        {att.type === 'image' && att.preview ? (
-                                                            <img src={att.preview} className="h-8 w-8 rounded object-cover" />
-                                                        ) : (
-                                                            <div className={`w-8 h-8 rounded flex items-center justify-center ${att.type.includes('pdf') ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                                                <i className={`fa-solid ${att.type.includes('pdf') ? 'fa-file-pdf' : att.type === 'image' ? 'fa-image' : 'fa-file'}`}></i>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] text-gray-300 max-w-[120px] truncate">{att.name}</span>
-                                                            {att.fromDrive && <span className="text-[9px] text-green-500 flex items-center gap-1"><i className="fa-brands fa-google-drive"></i> Drive</span>}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <div className={`p-4 rounded-2xl text-sm shadow-sm border ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none border-blue-500' : 'glass text-gray-200 rounded-tl-none border-white/5'}`}>
-                                            <div className="prose prose-sm prose-invert max-w-none" dangerouslySetInnerHTML={renderMarkdown(msg.text)}></div>
-                                            
-                                            {/* Sources */}
-                                            {msg.sources && msg.sources.length > 0 && (
-                                                <div className="mt-3 pt-3 border-t border-white/10">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {msg.sources.map((src, idx) => (
-                                                            <a key={idx} href={src.uri} target="_blank" className="flex items-center gap-1.5 px-2 py-1 bg-black/20 hover:bg-black/40 rounded border border-white/10 text-[10px] text-blue-300 transition-colors no-underline">
-                                                                <i className="fa-solid fa-link text-[8px]"></i> {src.title}
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 scroller">
+                            {messages.length === 0 && <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-30 select-none"><i className="fa-solid fa-scale-balanced text-5xl mb-4"></i><p className="text-sm font-medium">MetrologyPro Enterprise</p></div>}
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`msg-enter flex gap-4 max-w-4xl mx-auto ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    {msg.role === 'ai' && <div className="w-9 h-9 rounded-xl bg-[#1c1c1f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-1"><i className="fa-solid fa-robot text-blue-400 text-sm"></i></div>}
+                                    <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                                        <div className="flex items-center gap-2 px-1"><span className="text-[10px] text-gray-500 font-mono opacity-70 uppercase tracking-wider">{msg.role === 'user' ? 'Anda' : 'Assistant'} • {msg.timestamp}</span></div>
+                                        {msg.attachments && msg.attachments.length > 0 && <div className="flex flex-wrap gap-2 justify-end">{msg.attachments.map((att, i) => (<div key={i} className="bg-[#1c1c1f] border border-white/10 rounded-lg p-2 flex items-center gap-3 pr-4 max-w-full">{att.type === 'image' && att.preview ? <img src={att.preview} className="h-10 w-10 rounded object-cover" /> : <div className={`h-12 w-12 flex items-center justify-center rounded-md ${att.type==='pdf' ? 'bg-red-500/10 text-red-400' : 'bg-white/10 text-gray-400'}`}><i className={`fa-solid ${att.type==='pdf' ? 'fa-file-pdf text-xl' : 'fa-file text-xl'}`}></i></div>}<span className="text-xs text-gray-300 truncate max-w-[150px] font-medium">{att.name}</span></div>))}</div>}
+                                        <div className={`p-5 rounded-2xl text-[0.935rem] shadow-sm border ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none border-blue-500 text-left user-content' : 'bg-[#18181b] text-gray-200 rounded-tl-none border-white/5'}`}>
+                                            <div className="prose prose-invert" dangerouslySetInnerHTML={renderMarkdown(msg.text)}></div>
+                                            {msg.sources && msg.sources.length > 0 && <div className="mt-4 pt-4 border-t border-white/10"><p className="text-[10px] font-bold text-gray-500 uppercase mb-2">Sumber Referensi:</p><div className="flex flex-wrap gap-2">{msg.sources.map((src, i) => (<a key={i} href={src.uri} target="_blank" className="flex items-center gap-1.5 px-2.5 py-1.5 bg-black/20 hover:bg-black/40 rounded-md border border-white/10 text-[11px] text-blue-300 transition-colors no-underline"><i className="fa-solid fa-link text-[9px]"></i> {src.title}</a>))}</div></div>}
                                         </div>
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && (
-                                <div className="flex gap-4 max-w-4xl mx-auto">
-                                    <div className="w-8 h-8 rounded bg-transparent flex items-center justify-center mt-1">
-                                        <i className="fa-solid fa-robot text-gray-600 text-xs"></i>
-                                    </div>
-                                    <div className="glass px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-1.5">
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div>
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div>
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
+                            {isLoading && <div className="flex gap-4 max-w-4xl mx-auto"><div className="w-9 h-9 rounded-xl bg-transparent flex items-center justify-center mt-1"><i className="fa-solid fa-robot text-gray-600 text-sm"></i></div><div className="px-5 py-4 bg-[#18181b] border border-white/5 rounded-2xl rounded-tl-none flex gap-1.5 items-center"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div><div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div><div className="w-1.5 h-1.5 bg-blue-500 rounded-full typing-dot"></div></div></div>}
+                            <div ref={bottomRef} className="h-4"></div>
                         </div>
 
-                        {/* Input Area */}
-                        <div className="p-4 md:p-6 z-30">
-                            <div className="max-w-4xl mx-auto relative glass-popover rounded-2xl p-2">
-                                
-                                {/* Popup Menu */}
-                                {isMenuOpen && (
-                                    <div ref={menuRef} className="absolute bottom-full left-0 mb-3 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[200px] animate-slide-up flex flex-col z-50">
-                                        <button onClick={() => { if(!user) { alert('Login dulu bosku'); return; } setShowDrive(true); setIsMenuOpen(false); }} className={`flex items-center gap-3 px-4 py-3 hover:bg-white/5 border-b border-white/5 text-left ${!user && 'opacity-50'}`}>
-                                            <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400"><i className="fa-brands fa-google-drive"></i></div>
-                                            <div><div className="text-sm font-medium text-white">Google Drive</div><div className="text-[10px] text-gray-500">Cloud Storage</div></div>
-                                        </button>
-                                        <button onClick={() => pdfInputRef.current.click()} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 border-b border-white/5 text-left">
-                                            <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400"><i className="fa-solid fa-file-pdf"></i></div>
-                                            <div><div className="text-sm font-medium text-white">Upload PDF</div><div className="text-[10px] text-gray-500">Regulasi & Dokumen</div></div>
-                                        </button>
-                                        <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left">
-                                            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400"><i className="fa-solid fa-image"></i></div>
-                                            <div><div className="text-sm font-medium text-white">Upload Foto</div><div className="text-[10px] text-gray-500">Analisis Visual</div></div>
-                                        </button>
-                                    </div>
-                                )}
-
-                                {/* Hidden Inputs */}
-                                <input type="file" ref={fileInputRef} onChange={(e) => handleFileSelect(e, 'image')} className="hidden" accept="image/*" />
-                                <input type="file" ref={pdfInputRef} onChange={(e) => handleFileSelect(e, 'pdf')} className="hidden" accept=".pdf" />
-
-                                {/* Preview Attachments */}
-                                {attachments.length > 0 && (
-                                    <div className="flex gap-2 p-2 mb-1 border-b border-white/5 overflow-x-auto">
-                                        {attachments.map((att, idx) => (
-                                            <div key={idx} className="relative bg-[#09090b] rounded p-1 border border-white/10 group">
-                                                {att.type === 'image' && att.preview ? <img src={att.preview} className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 flex items-center justify-center bg-gray-800 rounded text-gray-400"><i className={`fa-solid ${att.type.includes('pdf') ? 'fa-file-pdf' : 'fa-file'}`}></i></div>}
-                                                <button onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]"><i className="fa-solid fa-xmark"></i></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
+                        {/* INPUT */}
+                        <div className="p-3 md:p-5 z-30 bg-gradient-to-t from-[#09090b] to-transparent safe-bottom">
+                            <div className="max-w-4xl mx-auto relative glass-popover rounded-2xl p-2 transition-all shadow-2xl">
+                                {menuOpen && <div className="absolute bottom-full left-0 mb-2 bg-[#1c1c1f] border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[220px] z-50 flex flex-col msg-enter">
+                                    <button onClick={() => { if(!user) alert("Login Google diperlukan."); else alert("Mode Simulasi Drive Lokal."); setMenuOpen(false); }} className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 border-b border-white/5 text-left"><i className="fa-brands fa-google-drive text-green-400 w-5 text-center text-lg"></i><div><div className="text-sm text-white font-medium">Google Drive</div><div className="text-[10px] text-gray-500">Pilih dari Cloud</div></div></button>
+                                    <button onClick={() => pdfRef.current.click()} className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 border-b border-white/5 text-left"><i className="fa-solid fa-file-pdf text-red-400 w-5 text-center text-lg"></i><div><div className="text-sm text-white font-medium">Upload PDF</div><div className="text-[10px] text-gray-500">Analisis Dokumen</div></div></button>
+                                    <button onClick={() => fileRef.current.click()} className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 text-left"><i className="fa-solid fa-image text-blue-400 w-5 text-center text-lg"></i><div><div className="text-sm text-white font-medium">Upload Gambar</div><div className="text-[10px] text-gray-500">Visi Komputer</div></div></button>
+                                </div>}
+                                <input type="file" ref={fileRef} onChange={(e) => handleFile(e, 'image')} className="hidden" accept="image/*" />
+                                <input type="file" ref={pdfRef} onChange={(e) => handleFile(e, 'pdf')} className="hidden" accept=".pdf" />
+                                {attachments.length > 0 && <div className="flex gap-2 p-2 border-b border-white/5 overflow-x-auto">{attachments.map((att, i) => (<div key={i} className="relative bg-black/40 rounded-lg p-1.5 border border-white/10 group">{att.type==='image' && att.preview ? <img src={att.preview} className="h-12 w-12 rounded-md object-cover" /> : <div className={`h-12 w-12 flex items-center justify-center rounded-md ${att.type==='pdf' ? 'bg-red-500/10 text-red-400' : 'bg-white/10 text-gray-400'}`}><i className={`fa-solid ${att.type==='pdf' ? 'fa-file-pdf text-xl' : 'fa-file text-xl'}`}></i></div>}<button onClick={() => setAttachments(attachments.filter((_, idx) => idx!==i))} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow-sm"><i className="fa-solid fa-xmark"></i></button></div>))}</div>}
                                 <form onSubmit={handleSend} className="flex items-end gap-2">
-                                    <button type="button" onClick={() => setIsMenuOpen(!isMenuOpen)} className={`p-3 rounded-xl transition-all ${isMenuOpen ? 'bg-blue-600 text-white rotate-45' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}><i className="fa-solid fa-plus text-lg"></i></button>
-                                    <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e); }}} placeholder={user ? "Ketik pesan, atau gunakan file Drive..." : "Ketik pesan..."} className="w-full bg-transparent border-none text-gray-200 placeholder-gray-500 focus:ring-0 resize-none max-h-32 min-h-[48px] py-3.5 text-sm" rows="1" style={{height:'auto'}}></textarea>
+                                    <button type="button" onClick={() => setMenuOpen(!menuOpen)} className={`p-3 rounded-xl transition-all ${menuOpen ? 'bg-white/10 text-white rotate-45' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}><i className="fa-solid fa-plus text-lg"></i></button>
+                                    <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e); }}} placeholder="Apa yang ingin Anda tanyakan mengenai Direktorat Metrologi?" className="w-full bg-transparent border-none text-gray-200 placeholder-gray-500 focus:ring-0 resize-none max-h-32 min-h-[44px] py-3 pl-4 text-sm leading-normal" rows="1" style={{height:'auto'}}></textarea>
                                     <button type="submit" disabled={!input.trim() && attachments.length === 0 || isLoading} className="p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-gray-600 text-white rounded-xl transition-all shadow-lg"><i className="fa-solid fa-paper-plane text-sm"></i></button>
                                 </form>
                             </div>
-                            <p className="text-center text-[10px] text-gray-600 mt-3">Powered by Gemini 2.5 Flash</p>
                         </div>
                     </div>
                 </div>
             );
         };
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
 </html>
+
 
 
