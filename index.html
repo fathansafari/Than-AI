@@ -70,19 +70,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCRSxm9fVf0rjOCdVfzGyPoYjK9_wtUr8I",
-            authDomain: "metrologi-ai.firebaseapp.com",
-            projectId: "metrologi-ai",
-            storageBucket: "metrologi-ai.firebasestorage.app",
-            messagingSenderId: "410304688412",
-            appId: "1:410304688412:web:308e7238e0ac27ddff4ad9",
-            measurementId: "G-51DBTK798E"
-        };
+    
 
         window.authService = { isConfigured: false, auth: null, login: async () => console.error("Firebase not configured"), logout: async () => {}, init: (cb) => cb(null) };
 
-        if (firebaseConfig.apiKey !== "ISI_API_KEY_FIREBASE_ANDA_DISINI") {
+        if (firebaseConfig.apiKey !== "AIzaSyD7nQn-RBaFFBUIszq5bj0nODicirwVoh4") {
             try {
                 const app = initializeApp(firebaseConfig);
                 const auth = getAuth(app);
@@ -103,7 +95,7 @@
         const { useState, useEffect, useRef } = React;
         
         // --- API KEY UPDATE ---
-        const API_KEY = "AIzaSyDaRkwLy7aHMChQZdR5E4qD-3KQkBETTe4"; 
+        const API_KEY = "AIzaSyBjbIiqrrdgZ9nZ-qWmwGBeEOSxIIqaTIs"; 
         const MODEL = "gemini-2.5-flash-preview-09-2025";
         
         const generateId = () => Math.random().toString(36).substr(2, 9);
